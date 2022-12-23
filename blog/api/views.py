@@ -1,23 +1,27 @@
 from django.shortcuts import render
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from rest_framework.mixins import ListModelMixin, CreateModelMixin,\
+from rest_framework.mixins import ListModelMixin, CreateModelMixin, \
     RetrieveModelMixin, UpdateModelMixin, \
     DestroyModelMixin
 from rest_framework.generics import GenericAPIView, get_object_or_404
 
 from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
+from .permissions import Permission
 
 
 class PostViewSet(ViewSet):
     queryset = Post.objects.all()
     model = Post
     serializer_class = PostSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication, ]
+    permission_classes = [Permission, ]
 
     def get_object(self):
-        return get_object_or_404(self.model, id=self.kwargs.get('id'))
+        return get_object_or_404(self.model, id=self.kwargs.get('pk'))
 
     def list(self, request):
         serializer = PostSerializer(self.queryset, many=True)
@@ -50,6 +54,8 @@ class PostViewSet(ViewSet):
 class CommentListCreateView(ListModelMixin, CreateModelMixin, GenericAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication, ]
+    permission_classes = [Permission, ]
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
@@ -64,6 +70,8 @@ class CommentListCreateView(ListModelMixin, CreateModelMixin, GenericAPIView):
 class CommentRetrieveUpDateDestroyView(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication, ]
+    permission_classes = [Permission]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
